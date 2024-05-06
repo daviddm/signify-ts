@@ -250,6 +250,31 @@ describe('multisig-join', () => {
                 rmids
             );
 
+        const multisigAid = await client3.identifiers().get(nameMultisig);
+
+        assert.equal(multisigAid.state.k.length, 3);
+        assert.equal(multisigAid.state.k[0], aid1.state.k[0]);
+        assert.equal(multisigAid.state.k[1], aid2.state.k[0]);
+        assert.equal(multisigAid.state.k[2], aid3.state.k[0]);
+
+        assert.equal(multisigAid.state.n.length, 3);
+        assert.equal(multisigAid.state.n[0], aid1.state.n[0]);
+        assert.equal(multisigAid.state.n[1], aid2.state.n[0]);
+        assert.equal(multisigAid.state.n[2], aid3.state.n[0]);
+
+        const members = await client3.identifiers().members(nameMultisig);
+        const eid = Object.keys(members.signing[2].ends.agent)[0];
+        const endRoleOperation = await client3
+            .identifiers()
+            .addEndRole(nameMultisig, 'agent', eid);
+        const endRoleResult = await waitOperation(
+            client3,
+            await endRoleOperation.op()
+        );
+
+        assert.equal(endRoleResult.done, true);
+        assert.equal(endRoleResult.error, null);
+
         await waitOperation(client3, joinOperation);
     });
 });
